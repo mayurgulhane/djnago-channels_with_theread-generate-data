@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Data Generate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container mt-5">
+        <p>Percentage Completed : <span id='completed'></span></p>
+        <div class="progress">
+            <div class="progress-bar bg-success" role="progressbar" aria-label="Success example"  aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+   
+    <table class="table mt-3">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Age</th>
+            <th scope="col">Address</th>
+          </tr>
+        </thead>
+        <tbody id="table_data">
+        
+         
+        </tbody>
+      </table>
+
+      <script>
+        var url = 'ws://localhost:8000/ws/data_genrate/'
+        var socket = new WebSocket(url)
+
+        socket.onopen = function(e){
+            console.log("Socket connected")
+        }
+
+        socket.onmessage = function(e){
+            var data = JSON.parse(e.data)
+            // console.log(data)
+            if(data.payload){
+                addData(data.payload)
+                increaseProgress(data.payload.total, data.payload.current_total)
+            }
+        }
+
+        socket.onclose = function(e){
+            console.log("Socket Disconnect")
+        }
+
+        function addData(data){
+            var html = `
+
+            <tr>
+                <th scope="row">${data.id}</th>
+                <td>${data.student_name}</td>
+                <td>${data.student_email}</td>
+                <td>${data.age}</td>
+                <td>${data.address}</td>
+              </tr>
+            `
+            document.getElementById('table_data').innerHTML += html
+        }
+
+        function increaseProgress(total, current_total){
+            var element = document.querySelector('.progress-bar')
+            var percent = parseInt((current_total/total)*100)
+            element.style.width = percent + '%'
+
+            document.getElementById('completed').innerHTML =  percent + '%'
+
+        }
+      </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+  </body>
+</div>
+</html>
